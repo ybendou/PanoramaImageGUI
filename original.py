@@ -21,12 +21,8 @@ class first_page():
 	def __init__(self,master):
 		self.frametop=Frame(master)
 		self.frametop.pack(side=TOP)
-		self.btn=Button(root, text="Select first image", command=self.select_image)
+		self.btn=Button(root, text="Select an image", command=self.select_image)
 		self.btn.pack(side="bottom", fill="both", expand="yes", padx="10", pady="10")
-
-		self.btnB=Button(root, text="Select second image", command=self.select_imageB)
-		self.btnB.pack(side="bottom", fill="both", expand="yes", padx="10", pady="10")
-
 		self.panelA= None
 		self.panelB= None
 		self.imageA=None
@@ -63,90 +59,37 @@ class first_page():
 			height=image.shape[0]
 			width=image.shape[1]
 			image = Image.fromarray(image)
-			blank_image=np.zeros((height,width,3), np.uint8)
-			blank_image= Image.fromarray(blank_image)
-			blank_image = ImageTk.PhotoImage(blank_image)
+
+			
 			#blank_image=np.zeros((height,width,3), np.uint8)
 			#blank_image=self.grid(height,width)
+			blank_image=np.zeros((height,width,3), np.uint8)
+			self.imageB=blank_image
 			# ...and then to ImageTk format
 			image = ImageTk.PhotoImage(image)
-			#blank_image= Image.fromarray(blank_image)
-			#blank_image = ImageTk.PhotoImage(blank_image)
+			blank_image= Image.fromarray(blank_image)
+			blank_image = ImageTk.PhotoImage(blank_image)
 			# if the panels are None, initialize them
-			if self.panelA is None:
+			if self.panelA is None or self.panelB is None:
 				# the first panel will store our original image
 				self.panelA = Label(image=image)
 				self.panelA.image = image
 				self.panelA.pack(side="left", padx=10, pady=10)
+
+				# while the second panel will store the edge map
 				self.panelB = Label(image=blank_image)
 				self.panelB.image = blank_image
 				self.panelB.pack(side="right", padx=10, pady=10)
-
-
-			
 
 			# otherwise, update the image panels
 			else:
 				# update the pannels
 				self.panelA.configure(image=image)
+				self.panelB.configure(image=edged)
 				self.panelA.image = image
-				self.panelB.configure(image=blank_image)
 				self.panelB.image = blank_image
 			self.panelA.bind('<Button-1>',self.A_click)
-
-
-	def select_imageB(self):
-
-
-	# open a file chooser dialog and allow the user to select an input
-	# image
-		path = tkinter.filedialog.askopenfilename()  
-
-		# ensure a file path was selected
-		if len(path) > 0:
-			image = cv2.imread(path)
-			
-
-			# OpenCV represents images in BGR order; however PIL represents
-			# images in RGB order, so we need to swap the channels
-			image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-			self.imageB=image
-			height=image.shape[0]
-			width=image.shape[1]
-			image = Image.fromarray(image)
-
-		
-			#blank_image=np.zeros((height,width,3), np.uint8)
-			#blank_image=self.grid(height,width)
-			
-			# ...and then to ImageTk format
-			image = ImageTk.PhotoImage(image)
-			#blank_image= Image.fromarray(blank_image)
-			#blank_image = ImageTk.PhotoImage(blank_image)
-			# if the panels are None, initialize them
-			if self.panelB is None:
-				# the first panel will store our original image
-				
-				# while the second panel will store the edge map
-				self.panelB = Label(image=image)
-				self.panelB.image = image
-				self.panelA.configure(image=self.imageA)
-				self.panelA.image=self.imageA
-				self.panelA.pack(side="left", padx=10, pady=10)
-
-				self.panelB.pack(side="right", padx=10, pady=10)
-
-
-			# otherwise, update the image panels
-			else:
-				# update the pannels
-				imageA = Image.fromarray(self.imageA)
-				imageA = ImageTk.PhotoImage(image)
-				self.panelA.configure(image=imageA)
-				self.panelA.image=self.imageA
-				self.panelB.configure(image=image)
-				self.panelB.image = image
-		self.panelB.bind('<Button-1>',self.B_click)
+			self.panelB.bind('<Button-1>',self.B_click)
 
 	def A_click(self,event):
 		x,y=event.x,event.y
@@ -209,10 +152,8 @@ class first_page():
 		return(image)
 	def compute(self):
 		height,width,_=self.imageB.shape
-		src=np.array(self.clicksA)[-4:]
-		dest=np.array(self.clicksB)[-4:]
-		#dest=np.array([(0,0),(height,0),(height,width),(0,width)])
-		h, status = cv2.findHomography(src, dest,cv2.RANSAC, 5.0)
+		dest=np.array([(0,0),(height,0),(height,width),(0,width)])
+		h, status = cv2.findHomography(np.array(self.clicksA)[-4:], dest,cv2.RANSAC, 5.0)
 		output=np.zeros((height,height,0),np.uint8)
 		
 		im_out = cv2.warpPerspective(self.input,h,(height,height))

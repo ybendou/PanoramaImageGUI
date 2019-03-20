@@ -24,14 +24,13 @@ def select_image():
  
         # OpenCV represents images in BGR order; however PIL represents
         # images in RGB order, so we need to swap the channels
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        height=int(1.5*(image.shape[0]))
-        width=int(1.5*(image.shape[1]))
-        image = Image.fromarray(image)
+		image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+		height=int(1.5*(image.shape[0]))
+		width=int(1.5*(image.shape[1]))
+		image = Image.fromarray(image)
 
-
-        blank_image=np.zeros((height,width,3), np.uint8)
-        blank_image= Image.fromarray(blank_image)
+		blank_image=np.zeros((height,width,3), np.uint8)
+		blank_image= Image.fromarray(blank_image)
 
 		# ...and then to ImageTk format
 		image = ImageTk.PhotoImage(image)
